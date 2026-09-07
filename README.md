@@ -49,3 +49,100 @@ flowchart TB
     style db fill:#1168bd,stroke:#0b4884,color:#ffffff
     style avito fill:transparent,stroke:#999999,stroke-dasharray: 5 5,color:#cccccc
 ```
+---
+
+## Схема базы данных
+
+В качестве СУБД на этапе MVP используется SQLite с управлением миграциями через Alembic. 
+
+### ER-диаграмма связей
+
+```mermaid
+erDiagram
+    RESTAURANTS ||--o{ MENU_ITEMS : "содержит"
+    RESTAURANTS ||--o{ ORDERS : "принимает"
+    ORDERS ||--|{ ORDER_ITEMS : "состоит из"
+    MENU_ITEMS ||--o{ ORDER_ITEMS : "включается в"
+
+    RESTAURANTS {
+        int id PK
+        string name
+        string address
+        datetime created_at
+    }
+
+    MENU_ITEMS {
+        int id PK
+        int restaurant_id FK
+        string name
+        string description
+        int price
+        bool is_available
+    }
+
+    ORDERS {
+        int id PK
+        int restaurant_id FK
+        int client_id
+        string delivery_address
+        enum status
+        int total_price
+        datetime created_at
+        datetime updated_at
+    }
+
+    ORDER_ITEMS {
+        int id PK
+        int order_id FK
+        int menu_item_id FK
+        int quantity
+        int price_at_order
+    }
+```
+
+---
+
+### Описание сущностей и таблиц
+
+* **`restaurants`** — заведения, подключенные к платформе:
+  * `id` (INTEGER, PK) — уникальный идентификатор заведения.
+  * `name` (VARCHAR) — наименование ресторана.
+  * `address` (VARCHAR) — фактический адрес.
+  * `created_at` (DATETIME) — дата и время подключения к сервису.
+
+* **`menu_items`** — блюда и позиции меню заведений:
+  * `id` (INTEGER, PK) — уникальный идентификатор позиции.
+  * `restaurant_id` (INTEGER, FK -> `restaurants.id`, `ON DELETE CASCADE`) — привязка блюда к заведению.
+  * `name` (VARCHAR) — название блюда.
+  * `description` (VARCHAR, NULL) — опциональное описание состава.
+  * `price` (INTEGER) — текущая базовая стоимость в копейках.
+  * `is_available` (BOOLEAN) — признак доступности для заказа (управление стоп-листом).
+
+* **`orders`** — клиентские заказы:
+  * `id` (INTEGER, PK) — номер заказа.
+  * `restaurant_id` (INTEGER, FK -> `restaurants.id`, `ON DELETE CASCADE`) — заведение, исполняющее заказ.
+  * `client_id` (INTEGER) — идентификатор пользователя (авторизация вынесена за рамки MVP).
+  * `delivery_address` (VARCHAR) — адрес доставки.
+  * `status` (ENUM) — жизненный цикл заказа (`created`, `cooking`, `ready_for_pickup`, `completed`, `cancelled`).
+  * `total_price` (INTEGER) — финальная стоимость заказа в копейках.
+  * `created_at` (DATETIME) — метка времени оформления.
+  * `updated_at` (DATETIME) — метка времени последней смены статуса.
+
+* **`order_items`** — состав конкретного чека:
+  * `id` (INTEGER, PK) — идентификатор позиции в заказе.
+  * `order_id` (INTEGER, FK -> `orders.id`, `ON DELETE CASCADE`) — привязка к заказу.
+  * `menu_item_id` (INTEGER, FK -> `menu_items.id`, `ON DELETE RESTRICT`) — привязка к исходному блюду из меню.
+  * `quantity` (INTEGER) — количество единиц товара.
+  * `price_at_order` (INTEGER) — зафиксированная цена единицы товара на момент покупки в копейках.
+
+---
+
+### Архитектурные решения в схеме данных
+
+* **Хранение денежных средств в целых числах (`Integer`):**
+  * Все финансовые поля (`price`, `total_price`, `price_at_order`) хранятся в неделимых единицах (копейках). Это исключает погрешности вычислений чисел с плавающей точкой (`Float`/`Double`).
+* **Снимок цены (`price_at_order`):**
+  * Цена единицы товара фиксируется в `order_items` в момент покупки. Последующие изменения цен рестораном в таблице `menu_items` не искажают исторические данные и финансовую отчетность по ранее выполненным заказам.
+* **Стратегии целостности связей (`Foreign Keys`):**
+  * `ON DELETE CASCADE` для связей ресторана и блюд/заказов: при удалении тестового заведения из системы автоматически очищаются зависимые позиции меню и заказы.
+  * `ON DELETE RESTRICT` для позиций в чеке (`order_items.menu_item_id`): запрещает удаление блюда из базы, если оно уже фигурирует в ранее оформленных заказах пользователей. Для вывода блюда из продажи предусмотрен флаг `is_available = False`.
