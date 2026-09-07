@@ -41,18 +41,13 @@ sequenceDiagram
     participant API as Сервис Авито.Кухня
     participant DB as База данных (SQLite)
 
-    %% Сценарий 3: Синхронизация меню
-    rect rgb(240, 248, 255)
-    note over Rest, API: Сценарий 3: Синхронизация меню заведения
+    Note over Rest, DB: Сценарий 3: Синхронизация меню заведения
     Rest->>API: POST /api/v1/restaurants/{id}/menu (список позиций)
     API->>DB: Сохранение/обновление позиций меню
     DB-->>API: Успешно сохранено
     API-->>Rest: 201 Created (Меню обновлено)
-    end
 
-    %% Сценарий 4: Обработка заказа (Happy Path)
-    rect rgb(245, 255, 245)
-    note over Rest, API: Сценарий 4: Обработка поступившего заказа
+    Note over Rest, DB: Сценарий 4: Обработка поступившего заказа
     loop Периодический опрос новых заказов
         Rest->>API: GET /api/v1/restaurants/{id}/orders?status=created
         API->>DB: Поиск заказов со статусом "created"
@@ -64,10 +59,9 @@ sequenceDiagram
     API->>DB: Обновление статуса на "cooking"
     API-->>Rest: 200 OK (Статус обновлен)
 
-    note over Rest: Приготовление блюд кухни (таймер)
+    Note over Rest: Приготовление блюд кухни (таймер)
 
     Rest->>API: PATCH /api/v1/orders/105/status {"status": "ready_for_pickup"}
     API->>DB: Обновление статуса на "ready_for_pickup"
     API-->>Rest: 200 OK (Заказ готов к выдаче)
-    end
 ```
