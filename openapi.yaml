@@ -1,0 +1,602 @@
+openapi: 3.1.0
+info:
+  title: Авито.Кухня API
+  description: Сервис оформления заказов и взаимодействия с ресторанами-партнёрами
+  version: 1.0.0
+paths:
+  /api/v1/restaurants:
+    post:
+      tags:
+      - Рестораны
+      summary: Регистрация нового заведения
+      operationId: create_restaurant_api_v1_restaurants_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestaurantCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestaurantResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - Рестораны
+      summary: Получение каталога заведений
+      operationId: get_restaurants_api_v1_restaurants_get
+      parameters:
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Количество пропускаемых записей
+          default: 0
+          title: Skip
+        description: Количество пропускаемых записей
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          description: Максимальное число заведений
+          default: 100
+          title: Limit
+        description: Максимальное число заведений
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RestaurantResponse'
+                title: Response Get Restaurants Api V1 Restaurants Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/restaurants/{restaurant_id}:
+    get:
+      tags:
+      - Рестораны
+      summary: Получение информации о заведении
+      operationId: get_restaurant_api_v1_restaurants__restaurant_id__get
+      parameters:
+      - name: restaurant_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Restaurant Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestaurantResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/restaurants/{restaurant_id}/menu:
+    get:
+      tags:
+      - Рестораны
+      summary: Получение меню ресторана
+      operationId: get_restaurant_menu_api_v1_restaurants__restaurant_id__menu_get
+      parameters:
+      - name: restaurant_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Restaurant Id
+      - name: is_available
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          description: Фильтр стоп-листа (true — только блюда в наличии)
+          title: Is Available
+        description: Фильтр стоп-листа (true — только блюда в наличии)
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MenuItemResponse'
+                title: Response Get Restaurant Menu Api V1 Restaurants  Restaurant
+                  Id  Menu Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+      - Рестораны
+      summary: Добавление позиции в меню
+      operationId: create_menu_item_api_v1_restaurants__restaurant_id__menu_post
+      parameters:
+      - name: restaurant_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Restaurant Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuItemCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuItemResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/menu/{item_id}:
+    patch:
+      tags:
+      - Меню
+      summary: Частичное обновление блюда (стоп-лист и цены)
+      operationId: update_menu_item_api_v1_menu__item_id__patch
+      parameters:
+      - name: item_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Item Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuItemUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuItemResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/orders:
+    post:
+      tags:
+      - Заказы
+      summary: Оформление нового заказа
+      operationId: create_order_api_v1_orders_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCreate'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/orders/{order_id}:
+    get:
+      tags:
+      - Заказы
+      summary: Получение информации о заказе
+      operationId: get_order_api_v1_orders__order_id__get
+      parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Order Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/restaurants/{restaurant_id}/orders:
+    get:
+      tags:
+      - Заказы
+      summary: Список заказов ресторана (для кухни)
+      operationId: get_restaurant_orders_api_v1_restaurants__restaurant_id__orders_get
+      parameters:
+      - name: restaurant_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Restaurant Id
+      - name: status
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - $ref: '#/components/schemas/Status'
+          - type: 'null'
+          description: Фильтр по статусу (например, created для новых заказов)
+          title: Status
+        description: Фильтр по статусу (например, created для новых заказов)
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderResponse'
+                title: Response Get Restaurant Orders Api V1 Restaurants  Restaurant
+                  Id  Orders Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/orders/{order_id}/status:
+    patch:
+      tags:
+      - Заказы
+      summary: Смена статуса заказа кухней
+      operationId: update_order_status_api_v1_orders__order_id__status_patch
+      parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Order Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderStatusUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    MenuItemCreate:
+      properties:
+        name:
+          type: string
+          title: Name
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        price:
+          type: integer
+          exclusiveMinimum: 0.0
+          title: Price
+          description: Цена в копейках
+        is_available:
+          type: boolean
+          title: Is Available
+          default: true
+      type: object
+      required:
+      - name
+      - price
+      title: MenuItemCreate
+    MenuItemResponse:
+      properties:
+        id:
+          type: integer
+          title: Id
+        restaurant_id:
+          type: integer
+          title: Restaurant Id
+        name:
+          type: string
+          title: Name
+        price:
+          type: integer
+          title: Price
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        is_available:
+          type: boolean
+          title: Is Available
+      type: object
+      required:
+      - id
+      - restaurant_id
+      - name
+      - price
+      - description
+      - is_available
+      title: MenuItemResponse
+    MenuItemUpdate:
+      properties:
+        name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Name
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        price:
+          anyOf:
+          - type: integer
+            exclusiveMinimum: 0.0
+          - type: 'null'
+          title: Price
+        is_available:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Available
+      type: object
+      title: MenuItemUpdate
+    OrderCreate:
+      properties:
+        restaurant_id:
+          type: integer
+          title: Restaurant Id
+        client_id:
+          type: integer
+          title: Client Id
+        delivery_address:
+          type: string
+          title: Delivery Address
+        items:
+          items:
+            $ref: '#/components/schemas/OrderItemCreate'
+          type: array
+          title: Items
+      type: object
+      required:
+      - restaurant_id
+      - client_id
+      - delivery_address
+      - items
+      title: OrderCreate
+    OrderItemCreate:
+      properties:
+        menu_item_id:
+          type: integer
+          title: Menu Item Id
+        quantity:
+          type: integer
+          exclusiveMinimum: 0.0
+          title: Quantity
+          description: Количество должно быть больше 0
+      type: object
+      required:
+      - menu_item_id
+      - quantity
+      title: OrderItemCreate
+    OrderItemResponse:
+      properties:
+        id:
+          type: integer
+          title: Id
+        order_id:
+          type: integer
+          title: Order Id
+        menu_item_id:
+          type: integer
+          title: Menu Item Id
+        quantity:
+          type: integer
+          title: Quantity
+        price_at_order:
+          type: integer
+          title: Price At Order
+      type: object
+      required:
+      - id
+      - order_id
+      - menu_item_id
+      - quantity
+      - price_at_order
+      title: OrderItemResponse
+    OrderResponse:
+      properties:
+        id:
+          type: integer
+          title: Id
+        restaurant_id:
+          type: integer
+          title: Restaurant Id
+        client_id:
+          type: integer
+          title: Client Id
+        delivery_address:
+          type: string
+          title: Delivery Address
+        status:
+          $ref: '#/components/schemas/Status'
+        total_price:
+          type: integer
+          title: Total Price
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+        items:
+          items:
+            $ref: '#/components/schemas/OrderItemResponse'
+          type: array
+          title: Items
+      type: object
+      required:
+      - id
+      - restaurant_id
+      - client_id
+      - delivery_address
+      - status
+      - total_price
+      - created_at
+      - updated_at
+      - items
+      title: OrderResponse
+    OrderStatusUpdate:
+      properties:
+        status:
+          $ref: '#/components/schemas/Status'
+      type: object
+      required:
+      - status
+      title: OrderStatusUpdate
+    RestaurantCreate:
+      properties:
+        name:
+          type: string
+          title: Name
+        address:
+          type: string
+          title: Address
+      type: object
+      required:
+      - name
+      - address
+      title: RestaurantCreate
+    RestaurantResponse:
+      properties:
+        id:
+          type: integer
+          title: Id
+        name:
+          type: string
+          title: Name
+        address:
+          type: string
+          title: Address
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      type: object
+      required:
+      - id
+      - name
+      - address
+      - created_at
+      title: RestaurantResponse
+    Status:
+      type: string
+      enum:
+      - created
+      - cooking
+      - ready_for_pickup
+      - completed
+      - cancelled
+      title: Status
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
