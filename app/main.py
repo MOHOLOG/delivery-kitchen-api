@@ -1,6 +1,11 @@
-def main():
-    print("Hello from backend-trainee-assignment-autumn-2026-flow-2-moholog-a6e7a12b!")
+from fastapi import FastAPI
 
+from app.api.v1 import api_router
 
-if __name__ == "__main__":
-    main()
+app = FastAPI(
+    title="Авито.Кухня API",
+    description="Сервис оформления заказов и взаимодействия с ресторанами-партнёрами",
+    version="1.0.0",
+)
+
+app.include_router(api_router, prefix="/api/v1")
