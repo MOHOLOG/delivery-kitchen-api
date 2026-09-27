@@ -3,8 +3,8 @@ from fastapi import FastAPI
 from app.api.v1 import api_router
 
 app = FastAPI(
-    title="Авито.Кухня API",
-    description="Сервис оформления заказов и взаимодействия с ресторанами-партнёрами",
+    title="Delivery Kitchen API",
+    description="REST API сервиса заказа и доставки еды с симулятором кухни",
     version="1.0.0",
 )
 

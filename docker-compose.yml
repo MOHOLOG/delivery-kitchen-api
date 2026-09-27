@@ -1,0 +1,27 @@
+services:
+  kitchen-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kitchen-api
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: "sqlite:////app/data/kitchen.db"
+    volumes:
+      - sqlite_data:/app/data
+    restart: unless-stopped
+
+  restaurant-service:
+    build:
+      context: ./restaurant_service
+      dockerfile: Dockerfile
+    container_name: restaurant-service
+    environment:
+      KITCHEN_API_URL: "http://kitchen-api:8000"
+    depends_on:
+      - kitchen-api
+    restart: unless-stopped
+
+volumes:
+  sqlite_data:

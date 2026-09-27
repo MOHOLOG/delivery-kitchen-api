@@ -11,11 +11,11 @@ from typing import Any
 
 import requests
 
-BASE_URL = os.getenv("AVITO_API_URL", "http://localhost:8000")
+BASE_URL = os.getenv("KITCHEN_API_URL", "http://localhost:8000")
 
 
 def wait_for_main_service() -> None:
-    print("Ожидание подключения к платформе Авито.Кухня...")
+    print("Ожидание подключения к платформе...")
     endpoint = f"{BASE_URL}/api/v1/restaurants"
 
     while True:

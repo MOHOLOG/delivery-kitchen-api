@@ -6,7 +6,7 @@
 sequenceDiagram
     autonumber
     actor Client as Клиент
-    participant API as Сервис Авито.Кухня
+    participant API as Сервис заказов
     participant DB as База данных (SQLite)
 
     %% 1. Получение меню
@@ -38,7 +38,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Rest as Сервис Ресторана
-    participant API as Сервис Авито.Кухня
+    participant API as Сервис заказов
     participant DB as База данных (SQLite)
 
     Note over Rest, DB: Сценарий 3: Синхронизация меню заведения
