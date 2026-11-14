@@ -1,0 +1,50 @@
+# Kilo / agent tooling
+.kilo/
+AGENTS.md
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Secrets and certificates
+.env
+.env.*
+certs/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+kitchen.db
+
+# Pytest / coverage
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Ruff / mypy / other caches
+.ruff_cache/
+.mypy_cache/
+.pytype/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+
+# OS files
+.DS_Store
+Thumbs.db
